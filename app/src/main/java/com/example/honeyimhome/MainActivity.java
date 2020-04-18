@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     LocationTracker locationTracker;
     Button btnTracking;
     LocationManager locationManager;
+    BroadcastReceiver broadcastReceiver;
     private static final String LATITUDE_PATTERN = "latitude: ";
     private static final String LONGITUDE_PATTERN = "longitude: ";
     private static final String ACCURACY_PATTERN = "accuracy: ";
@@ -49,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
         homeLocationInfo = MyPreferences.getHomeLocationFromMyPref(getApplicationContext());
         btnSetHomeLocation = (Button) findViewById(R.id.btn_set_home_location);
         btnClearHomeLocation = (Button) findViewById(R.id.btn_clear_home);
+        broadcastReceiver = new BroadcastReceiver() { //todo is this ok?
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                //todo should I use action here and call stop/start tracking from here
+            }
+        };
         setHomeLocationTextView();
     }
 
@@ -61,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //todo remove broadcastReceiver.
+        if (broadcastReceiver != null) {
+            unregisterReceiver(broadcastReceiver);
+            broadcastReceiver = null;
+        }
     }
 
     public void trackingButtonOnClick(View view) {
@@ -90,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             locationTracker.startTracking();
             btnTracking.setText("stop tracking");
             addSetHomeLocationButtonToScreen();
+            sendBroadcastMessage("started");//todo action?
         }
     }
 
@@ -116,6 +129,12 @@ public class MainActivity extends AppCompatActivity {
         btnTracking.setText("start tracking location");
         removeSetHomeLocationButtonFromScreen();
         setLocationTextViewsToDefaultPatterns();
+        sendBroadcastMessage("stopped");//todo action?
+    }
+
+    public void sendBroadcastMessage(String message){
+        Intent intent = new Intent(message);
+        sendBroadcast(intent);
     }
 
     private void askForPermission() {

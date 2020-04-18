@@ -5,6 +5,7 @@ import android.Manifest;
 import androidx.core.app.ActivityCompat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -42,6 +43,8 @@ public class LocationTracker {
             else {
                 MainActivity.removeSetHomeLocationButtonFromScreen();
             }
+            Intent intent = new Intent("new_location");
+            context.sendBroadcast(intent);
         }
 
         @Override
