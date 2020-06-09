@@ -70,53 +70,16 @@ public class LocationTracker {
 
     private void getLocation() {
         //Check Permissions again
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {// && ActivityCompat.checkSelfPermission(context,
-            //todo delete?
-            // Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     2000,
                     10, locationListenerGPS);
-//            Location LocationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//            Location LocationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//            Location LocationPassive = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-//            LocationInfo currentLocationInfo = new LocationInfo();
-//            if (LocationGps != null) {
-//                double lat = LocationGps.getLatitude();
-//                double longi = LocationGps.getLongitude();
-//
-//                latitude = String.valueOf(lat);
-//                longitude = String.valueOf(longi);
-//
-//                Log.e("myDebug","Your Location:" + "\n" + "Latitude= " + latitude + "\n" + "Longitude= " + longitude);
-//                Log.e("myDebug","1***call -LocationGps.getLatitude");
-//
-//            } else if (LocationNetwork != null) {
-//                double lat = LocationNetwork.getLatitude();
-//                double longi = LocationNetwork.getLongitude();
-//                double accuracy = LocationNetwork.getAccuracy();
-//                currentLocationInfo.setLatitude(String.valueOf(lat));
-//                currentLocationInfo.setLongitude(String.valueOf(longi));
-//                currentLocationInfo.setAccuracy(String.valueOf(accuracy));
-//
-//                Log.e("myDebug","Your Location:" + "\n" + "Latitude= " + latitude + "\n" + "Longitude= " + longitude);
-//                Log.e("myDebug","2*call -LocationGps.getLatitude");
-//
-//            } else if (LocationPassive != null) {
-//                double lat = LocationPassive.getLatitude();
-//                double longi = LocationPassive.getLongitude();
-//
-//                latitude = String.valueOf(lat);
-//                longitude = String.valueOf(longi);
-//                MainActivity.setLocationTextViesToCurrentLocation(currentLocationInfo);
-//                showLocationTxt.setText("Your Location:" + "\n" + "Latitude= " + latitude + "\n" + "Longitude= " + longitude);
-//            } else {
-//                Log.e("Error", "Can't Get Your Location");
-//            }
         }
 
     }
 
     public void stopTracking() {
+
     }
 
 }
