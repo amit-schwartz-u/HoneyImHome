@@ -37,10 +37,9 @@ public class LocationTracker {
             currentLocationInfo.setLongitude(String.valueOf(longitude));
             currentLocationInfo.setAccuracy(String.valueOf(accuracy));
             MainActivity.setLocationTextViesToCurrentLocation(currentLocationInfo);
-            if (accuracy<50){
+            if (accuracy < 50) {
                 MainActivity.addSetHomeLocationButtonToScreen();
-            }
-            else {
+            } else {
                 MainActivity.removeSetHomeLocationButtonFromScreen();
             }
             Intent intent = new Intent("new_location");
@@ -79,7 +78,8 @@ public class LocationTracker {
     }
 
     public void stopTracking() {
-
+        Intent intent = new Intent("stop_tracking");
+        context.sendBroadcast(intent);
     }
 
 }
