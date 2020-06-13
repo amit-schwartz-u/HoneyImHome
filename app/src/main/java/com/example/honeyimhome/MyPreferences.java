@@ -29,4 +29,16 @@ class MyPreferences {
         LocationInfo locationInfo = gson.fromJson(json, type);
         return locationInfo;
     }
+
+    public static void savePhoneNumberMyPref(Context context, String number) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("phoneNumber", number);
+        editor.apply();
+    }
+
+    public static String getPhoneNumberMyPref(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
+        return sharedPreferences.getString("phoneNumber", null);
+    }
 }
