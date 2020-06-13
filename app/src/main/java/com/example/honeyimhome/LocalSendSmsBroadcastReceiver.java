@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -14,6 +15,9 @@ public class LocalSendSmsBroadcastReceiver extends BroadcastReceiver {
     public static final String PHONE_NUMBER = "PHONE";
     public static final String CONTENT = "CONTENT";
 
+//    public LocalSendSmsBroadcastReceiver(IntentFilter intentFilter){
+//
+//    }
     @Override
     public void onReceive(Context context, Intent intent) {
         if (isSendSmsRuntimePermissionGranted(context)) {

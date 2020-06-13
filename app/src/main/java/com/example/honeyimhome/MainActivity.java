@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -18,6 +19,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,12 +42,14 @@ public class MainActivity extends AppCompatActivity {
     private LocationInfo homeLocationInfo;
     private static Button btnSetHomeLocation;
     private static Button btnClearHomeLocation;
+    private static Button btnTestSms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnTracking = (Button) findViewById(R.id.btn_tracking);
+        btnTestSms = (Button) findViewById(R.id.btn_test_sms);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationTracker = new LocationTracker(this, locationManager);
         homeLocationInfo = MyPreferences.getHomeLocationFromMyPref(getApplicationContext());
@@ -59,6 +63,18 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         setHomeLocationTextView();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String phoneNumber = MyPreferences.getPhoneNumberMyPref(this);
+        if (phoneNumber != null) {
+            btnTestSms.setVisibility(View.VISIBLE);
+        } else {
+            btnTestSms.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void initializeTextViews() {
@@ -82,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 startTrackingLocation();
                 Log.e("myDebug", "***call -startTrackingLocation");
             } else {
-                askForPermission();
+                askForLocationPermission();
             }
         } else {//if the tracking is already running and the user asked to stop
             stopTrackingLocation();
@@ -132,12 +148,12 @@ public class MainActivity extends AppCompatActivity {
         sendBroadcastMessage("stopped");//todo action?
     }
 
-    public void sendBroadcastMessage(String message){
+    public void sendBroadcastMessage(String message) {
         Intent intent = new Intent(message);
         sendBroadcast(intent);
     }
 
-    private void askForPermission() {
+    private void askForLocationPermission() {
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 12);
     }
@@ -155,6 +171,15 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startTrackingLocation();
+            } else {
+                Toast.makeText(getApplicationContext(), REQUEST_PERMISSION_MSG, Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == 10) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(this, EditNumberAlertDialog.class);
+                startActivity(intent);
             } else {
                 Toast.makeText(getApplicationContext(), REQUEST_PERMISSION_MSG, Toast.LENGTH_LONG).show();
             }
@@ -181,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             removeClearHomeLocationButtonFromScreen();
         }
         initializeTextViews();
-        if (isTrackingOff()){
+        if (isTrackingOff()) {
             removeSetHomeLocationButtonFromScreen();
         }
     }
@@ -247,5 +272,33 @@ public class MainActivity extends AppCompatActivity {
         removeSetHomeLocationButtonFromScreen();
         removeClearHomeLocationButtonFromScreen();
         MyPreferences.saveHomeLocationToMyPref(this, null);
+    }
+
+    public void sendSmsOnClick(View view) {
+        if (isSendSmsRuntimePermissionGranted(getApplicationContext())) {
+            Intent intent = new Intent(this, EditNumberAlertDialog.class);
+            startActivity(intent);
+        } else {
+            askForSmsPermission();
+        }
+    }
+
+    private void askForSmsPermission() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.SEND_SMS}, 10);
+    }
+
+    private boolean isSendSmsRuntimePermissionGranted(Context context) {
+        return ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    //**********************************************************************
+    public void testSmsOnClick(View view) {
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        Intent intent = new Intent();
+        intent.putExtra(LocalSendSmsBroadcastReceiver.PHONE_NUMBER, MyPreferences.getPhoneNumberMyPref(this));
+        intent.putExtra(LocalSendSmsBroadcastReceiver.CONTENT, "Honey I'm Sending a Test Message!");
+        intent.setAction("POST_PC.ACTION_SEND_SMS");
+        localBroadcastManager.sendBroadcast(intent);
     }
 }
