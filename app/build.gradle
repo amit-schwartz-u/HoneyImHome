@@ -34,5 +34,17 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'androidx.work:work-runtime:2.1.0'
+    //noinspection GradleCompatible
+    implementation "com.android.support:support-compat:28.0.0"
+    def work_version = "2.3.4"
+
+    // (Java only)
+    implementation "androidx.work:work-runtime:$work_version"
+
+    // Kotlin + coroutines
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    // for "listenable-future"
+    implementation "androidx.concurrent:concurrent-futures:1.0.0"
 
 }

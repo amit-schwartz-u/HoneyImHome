@@ -41,4 +41,23 @@ class MyPreferences {
         SharedPreferences sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
         return sharedPreferences.getString("phoneNumber", null);
     }
+
+    public static void saveCurrentLocationToMyPref(Context context, LocationInfo locationInfo) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(locationInfo);
+        editor.putString("currentLocation", json);
+        editor.apply();
+    }
+
+    public static LocationInfo getCurrentLocationFromMyPref(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("currentLocation", null);
+        Type type = new TypeToken<LocationInfo>() {
+        }.getType();
+        LocationInfo locationInfo = gson.fromJson(json, type);
+        return locationInfo;
+    }
 }
