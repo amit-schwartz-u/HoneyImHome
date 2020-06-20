@@ -40,7 +40,7 @@ public class LocationTracker {
                 Intent intent = new Intent("new_location");
                 intent.putExtra("latitude", latitude); //todo needed?
                 intent.putExtra("longitude", longitude); //todo needed?
-                intent.putExtra("accuracy", accuracy); //todo needed?
+                intent.putExtra("accuracy", accuracy);
                 context.sendBroadcast(intent);
                 MainActivity.addSetHomeLocationButtonToScreen();
             } else {
