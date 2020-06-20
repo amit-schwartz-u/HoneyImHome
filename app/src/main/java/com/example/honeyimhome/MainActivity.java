@@ -6,22 +6,27 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,11 +64,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
+                if (action=="POST_PC.ACTION_SEND_SMS"){
+                    Log.e("debug", "got to Mainactivity broadcastReceiver with action POST_PC.ACTION_SEND_SMS***");
+                }
                 //todo should I use action here and call stop/start tracking from here
             }
         };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("POST_PC.ACTION_SEND_SMS");
+        this.registerReceiver(broadcastReceiver, filter);
         setHomeLocationTextView();
-
+//        final PeriodicWorkRequest periodicWorkRequest
+//                = new PeriodicWorkRequest.Builder(LocationUploadWorker.class, 15, TimeUnit.MINUTES)
+//                .build();
+//        WorkManager workManager = WorkManager.getInstance(this);
+//        workManager.enqueue(periodicWorkRequest);
     }
 
     @Override
@@ -294,11 +309,11 @@ public class MainActivity extends AppCompatActivity {
 
     //**********************************************************************
     public void testSmsOnClick(View view) {
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        Log.e("got to", "testSmsOnClick");
         Intent intent = new Intent();
         intent.putExtra(LocalSendSmsBroadcastReceiver.PHONE_NUMBER, MyPreferences.getPhoneNumberMyPref(this));
         intent.putExtra(LocalSendSmsBroadcastReceiver.CONTENT, "Honey I'm Sending a Test Message!");
         intent.setAction("POST_PC.ACTION_SEND_SMS");
-        localBroadcastManager.sendBroadcast(intent);
+        this.sendBroadcast(intent);
     }
 }

@@ -32,17 +32,21 @@ public class LocationTracker {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             double accuracy = location.getAccuracy();
-            Log.e("debug", "**" + String.valueOf(latitude) + String.valueOf(longitude));
+            Log.e("debug", "onLocationChanged**" + String.valueOf(latitude) + String.valueOf(longitude));
             currentLocationInfo.setLatitude(String.valueOf(latitude));
             currentLocationInfo.setLongitude(String.valueOf(longitude));
             currentLocationInfo.setAccuracy(String.valueOf(accuracy));
             MainActivity.setLocationTextViesToCurrentLocation(currentLocationInfo);
             if (accuracy < 50) {
+                Log.e("debug", " accuracy < 50 ***");
                 MainActivity.addSetHomeLocationButtonToScreen();
             } else {
                 MainActivity.removeSetHomeLocationButtonFromScreen();
             }
             Intent intent = new Intent("new_location");
+            intent.putExtra(LocalSendSmsBroadcastReceiver.PHONE_NUMBER, MyPreferences.getPhoneNumberMyPref(context));
+            intent.putExtra(LocalSendSmsBroadcastReceiver.CONTENT, "Honey I'm Home!");
+            intent.setAction("POST_PC.ACTION_SEND_SMS");
             context.sendBroadcast(intent);
         }
 
@@ -64,6 +68,7 @@ public class LocationTracker {
 
 
     public void startTracking() {
+        Log.e("got to ", "LocationTracker startTracking ***");
         getLocation();
     }
 
@@ -73,6 +78,7 @@ public class LocationTracker {
             this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     2000,
                     10, locationListenerGPS);
+            Log.e("got to ", "LocationTracker getLocation requestLocationUpdates ***");
         }
 
     }
