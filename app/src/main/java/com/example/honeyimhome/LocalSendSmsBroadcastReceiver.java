@@ -14,12 +14,16 @@ import androidx.core.app.ActivityCompat;
 public class LocalSendSmsBroadcastReceiver extends BroadcastReceiver {
     public static final String PHONE_NUMBER = "PHONE";
     public static final String CONTENT = "CONTENT";
+    private Context context;
 
-//    public LocalSendSmsBroadcastReceiver(IntentFilter intentFilter){
-//
-//    }
+    public LocalSendSmsBroadcastReceiver(Context context) {
+        this.context = context;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.e("got to", "got to LocalSendSmsBroadcastReceiver on receive");
+
         if (isSendSmsRuntimePermissionGranted(context)) {
             String phoneNumber = intent.getStringExtra(PHONE_NUMBER);
             String smsContent = intent.getStringExtra(CONTENT);
@@ -27,11 +31,12 @@ public class LocalSendSmsBroadcastReceiver extends BroadcastReceiver {
                 Log.e("Invalid input", "Invalid input - check phone number or content");
                 return;
             } else {
-                SmsManager smgr = SmsManager.getDefault(); //todo check?
+                Log.e("LocalSendSms", " got to send - sending sms");
+                SmsManager smgr = SmsManager.getDefault();
                 smgr.sendTextMessage(phoneNumber, null, smsContent, null, null);
             }
         } else {
-            Log.e("MISSING_PERMISSION", "Error - missing send-sms runtime permission");
+            Log.e("LocalSendSms", "Error - missing send-sms runtime permission");
             return;
         }
     }
