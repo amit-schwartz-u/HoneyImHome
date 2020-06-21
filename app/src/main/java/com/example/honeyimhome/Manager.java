@@ -16,6 +16,5 @@ public class Manager extends Application {
         broadcastReceiver = new LocalSendSmsBroadcastReceiver(this);
         this.registerReceiver(broadcastReceiver, intentFilter);
         Log.e("Manager got to", "registerReceiver LocalSendSmsBroadcastReceiver");
-
     }
 }

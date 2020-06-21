@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -16,9 +17,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String EMPTY_TEXT = "";
     public static final String REQUEST_PERMISSION_MSG = "we need this permission or we can't operate";
-    public static final int FINE_LOCATION_REQUEST_CODE = 12; //todo is 12 ok?
+    public static final int FINE_LOCATION_REQUEST_CODE = 12;
     public static final String HOME_LOCATION_PATTERN = "your home location is defined as: ";
     LocationTracker locationTracker;
     Button btnTracking;
@@ -60,25 +63,27 @@ public class MainActivity extends AppCompatActivity {
         homeLocationInfo = MyPreferences.getHomeLocationFromMyPref(getApplicationContext());
         btnSetHomeLocation = (Button) findViewById(R.id.btn_set_home_location);
         btnClearHomeLocation = (Button) findViewById(R.id.btn_clear_home);
-        broadcastReceiver = new BroadcastReceiver() { //todo is this ok?
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action=="POST_PC.ACTION_SEND_SMS"){
-                    Log.e("debug", "got to Mainactivity broadcastReceiver with action POST_PC.ACTION_SEND_SMS***");
+                if ("POST_PC.ACTION_SEND_SMS".equals(action)) {
+                    Log.d("debug", "got to MainActivity broadcastReceiver with action POST_PC.ACTION_SEND_SMS***");
                 }
-                //todo should I use action here and call stop/start tracking from here
+
             }
         };
         IntentFilter filter = new IntentFilter();
         filter.addAction("POST_PC.ACTION_SEND_SMS");
         this.registerReceiver(broadcastReceiver, filter);
         setHomeLocationTextView();
-//        final PeriodicWorkRequest periodicWorkRequest
-//                = new PeriodicWorkRequest.Builder(LocationUploadWorker.class, 15, TimeUnit.MINUTES)
-//                .build();
-//        WorkManager workManager = WorkManager.getInstance(this);
-//        workManager.enqueue(periodicWorkRequest);
+        PeriodicWorkRequest periodicWorkRequest
+                = new PeriodicWorkRequest.Builder(LocationUploadWorker.class, 15, TimeUnit.MINUTES)
+                .addTag(LocationUploadWorker.TAG)
+                .setConstraints(Constraints.NONE)
+                .build();
+        WorkManager workManager = WorkManager.getInstance(this);
+        workManager.enqueue(periodicWorkRequest);
     }
 
     @Override
@@ -111,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         if (isTrackingOff()) {
             if (checkForFineLocationPermission()) {
                 startTrackingLocation();
-                Log.e("myDebug", "***call -startTrackingLocation");
+                Log.d("MainActivity", "***call -startTrackingLocation");
             } else {
                 askForLocationPermission();
             }
@@ -128,18 +133,15 @@ public class MainActivity extends AppCompatActivity {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             //call to enable gps
             OnGPS();
-            //todo what happens when stop after a..
         } else {
             locationTracker.startTracking();
             btnTracking.setText("stop tracking");
             addSetHomeLocationButtonToScreen();
-            sendBroadcastMessage("started");//todo action?
         }
     }
 
     private void OnGPS() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
         builder.setMessage("Enable GPS").setCancelable(false).setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -160,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
         btnTracking.setText("start tracking location");
         removeSetHomeLocationButtonFromScreen();
         setLocationTextViewsToDefaultPatterns();
-        sendBroadcastMessage("stopped");//todo action?
     }
 
     public void sendBroadcastMessage(String message) {
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setHomeLocationTextView() {
         if (homeLocationInfo != null && homeLocationInfo.getLongitude() != null) {
-            addHomeLocationToScreen(true);
+            addHomeLocationToScreen();
             addClearHomeButtonToScreen();
         } else {
             removeHomeLocationTextViewFromScreen();
@@ -242,20 +243,17 @@ public class MainActivity extends AppCompatActivity {
         btnSetHomeLocation.setVisibility(View.INVISIBLE);
     }
 
-    private void addHomeLocationToScreen(Boolean calledFromOnCreate) {
+    private void addHomeLocationToScreen() {
         TextView tvHomeLocation = findViewById(R.id.tv_home_location);
-        if (!calledFromOnCreate) {
-            homeLocationInfo = locationTracker.currentLocationInfo;
-        }
         tvHomeLocation.setText(HOME_LOCATION_PATTERN + homeLocationInfo.getLatitude() + " "
                 + homeLocationInfo.getLongitude());
         tvHomeLocation.setVisibility(View.VISIBLE);
     }
 
     public void setHomeButtonOnClick(View view) {
-        homeLocationInfo = locationTracker.currentLocationInfo;
+        homeLocationInfo = locationTracker.getCurrentLocationInfo();
         MyPreferences.saveHomeLocationToMyPref(getApplicationContext(), homeLocationInfo);
-        addHomeLocationToScreen(false);
+        addHomeLocationToScreen();
         addClearHomeButtonToScreen();
     }
 
@@ -309,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
 
     //**********************************************************************
     public void testSmsOnClick(View view) {
-        Log.e("got to", "testSmsOnClick");
+        Log.d("got to", "testSmsOnClick");
         Intent intent = new Intent();
         intent.putExtra(LocalSendSmsBroadcastReceiver.PHONE_NUMBER, MyPreferences.getPhoneNumberMyPref(this));
         intent.putExtra(LocalSendSmsBroadcastReceiver.CONTENT, "Honey I'm Sending a Test Message!");
