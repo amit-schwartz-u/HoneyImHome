@@ -3,6 +3,7 @@
     <extensionMap>
       <mapping pattern="README" type="PLAIN_TEXT" />
       <mapping pattern="help" type="PLAIN_TEXT" />
+      <mapping ext="jks" type="PLAIN_TEXT" />
       <mapping pattern="todelete" type="XML" />
       <mapping pattern="keep" type="XML" />
     </extensionMap>
